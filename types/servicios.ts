@@ -7,7 +7,7 @@ export type Servicio = {
     active: boolean;
   };
 
-  export type CatalogoConsultaMedica = {
+  export type ConsultaMedica = {
     id: number;
     nombre: string;
     descripcion: string;

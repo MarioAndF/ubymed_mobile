@@ -20,9 +20,9 @@ const styles = StyleSheet.create({
     padding: 16, // Padding para el texto
     marginLeft: 24,
     marginRight: 24,
-    marginTop: 8,
+    marginTop: 32,
     marginBottom: 32,
-    alignItems: 'center', // Centrar el texto
+    alignItems: 'center', // Centrar el texto   
     justifyContent: 'center' // Centrar el texto verticalmente
   },
   title: {
@@ -31,3 +31,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+

@@ -54,6 +54,7 @@ function RootLayoutNav() {
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="servicios/consultas" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="ordenes/consultas" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="caja" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

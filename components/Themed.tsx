@@ -1,9 +1,11 @@
-/**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
- */
-
-import { Text as DefaultText, useColorScheme, View as DefaultView, FlatList as DefaultFlatList, ActivityIndicator as DefaultActivityIndicator } from 'react-native';
+import {
+  Text as DefaultText,
+  useColorScheme,
+  View as DefaultView,
+  FlatList as DefaultFlatList,
+  ActivityIndicator as DefaultActivityIndicator,
+  SectionList as DefaultSectionList
+} from 'react-native';
 
 import Colors from '../constants/Colors';
 
@@ -15,6 +17,7 @@ type ThemeProps = {
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
 export type FlatListProps<T> = ThemeProps & DefaultFlatList<T>['props'];
+export type SectionListProps<T> = ThemeProps & DefaultSectionList<T>['props'];
 export type ActivityIndicatorProps = ThemeProps & DefaultActivityIndicator['props'];
 
 export function useThemeColor(
@@ -46,10 +49,17 @@ export function View(props: ViewProps) {
 }
 
 export function FlatList<T>(props: FlatListProps<T>) {
-  const { lightColor, darkColor, ...otherProps } = props;
+  const { lightColor, darkColor, style, ...otherProps } = props;
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 
-  return <DefaultFlatList<T> style={{ backgroundColor }} {...otherProps} />;
+  return <DefaultFlatList<T> style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+
+export function SectionList<T>(props: SectionListProps<T>) {
+  const { lightColor, darkColor, style, ...otherProps } = props;
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+
+  return <DefaultSectionList<T> style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
 export function ActivityIndicator(props: ActivityIndicatorProps) {

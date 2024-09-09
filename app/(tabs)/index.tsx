@@ -1,9 +1,8 @@
-// LIBRARIES
 import React, { useState, useEffect, useCallback } from 'react';
-import { Pressable, SectionList, RefreshControl } from "react-native";
-import { Link } from "expo-router";
+import { Pressable, SectionList, RefreshControl, StyleSheet, View } from 'react-native';
+import { Link } from 'expo-router';
 // COMPONENTS
-import { Text, View, FlatList, ActivityIndicator } from '../../components/Themed';
+import { Text, FlatList, ActivityIndicator } from '../../components/Themed';
 import { SectionHeader } from '../../components/SectionHeader';
 import { CategoryCard } from '../../components/Cards';
 // TYPES
@@ -16,7 +15,7 @@ export default function InicioScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(() => {
-    obtenerUbymedAPI("servicios")
+    obtenerUbymedAPI('servicios')
       .then((data) => {
         const serviciosActivos = data
           .filter((servicio: Servicio) => servicio.active)
@@ -39,13 +38,13 @@ export default function InicioScreen() {
   }, [loadData]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       {servicios ? (
         <SectionList
           sections={[
             { title: 'Servicios Disponibles', data: servicios },
-            { title: 'Directorios', data: servicios },
-            { title: 'Productos', data: servicios },
+            //{ title: 'Directorios', data: servicios },
+            //{ title: 'Productos', data: servicios },
           ]}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
@@ -66,9 +65,21 @@ export default function InicioScreen() {
           }
         />
       ) : (
-        <ActivityIndicator/>
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large"/>
+        </View>
       )}
     </View>
   );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

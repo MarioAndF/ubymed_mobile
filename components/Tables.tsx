@@ -1,5 +1,62 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+
+interface DateTimeTableProps {
+  initialDate: Date;
+  onDateChange: (date: Date) => void; // Añadimos esta prop para manejar el cambio de fecha/hora
+}
+
+export const DateTimeTable: React.FC<DateTimeTableProps> = ({ initialDate, onDateChange }) => {
+  const [date, setDate] = useState(initialDate);
+  const [time, setTime] = useState(initialDate);
+
+  const onChangeDate = (event: any, selectedDate: Date | undefined) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+    const updatedDateTime = new Date(currentDate);
+    updatedDateTime.setHours(time.getHours());
+    updatedDateTime.setMinutes(time.getMinutes());
+    onDateChange(updatedDateTime); // Llama al callback con la nueva fecha y hora
+  };
+
+  const onChangeTime = (event: any, selectedTime: Date | undefined) => {
+    const currentTime = selectedTime || time;
+    setTime(currentTime);
+    const updatedDateTime = new Date(date);
+    updatedDateTime.setHours(currentTime.getHours());
+    updatedDateTime.setMinutes(currentTime.getMinutes());
+    onDateChange(updatedDateTime); // Llama al callback con la nueva fecha y hora
+  };
+
+  useEffect(() => {
+    onDateChange(date); // Inicialmente, pasa la fecha inicial al componente padre
+  }, []);
+
+  return (
+    <View style={simpleTableStyles.table}>
+      <View style={[simpleTableStyles.row, simpleTableStyles.rowWithBorder]}>
+        <Text style={simpleTableStyles.firstCell}>Fecha</Text>
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={onChangeDate}
+        />
+      </View>
+      <View style={simpleTableStyles.row}>
+        <Text style={simpleTableStyles.firstCell}>Hora</Text>
+        <DateTimePicker
+          value={time}
+          mode="time"
+          display="default"
+          onChange={onChangeTime}
+        />
+      </View>
+    </View>
+  );
+};
 
 interface SimpleTableProps {
   data: any[];
@@ -29,14 +86,28 @@ export const SimpleTable: React.FC<SimpleTableProps> = ({ data }) => {
 
 interface EditableTableProps {
   data: { label: string; value: string }[];
+  onDataChange: (data: { label: string; value: string }[]) => void;
 }
 
-export const EditableTable: React.FC<EditableTableProps> = ({ data }) => {
+export const EditableTable: React.FC<EditableTableProps> = ({ data, onDataChange }) => {
   const [inputValues, setInputValues] = React.useState<string[]>(data.map(item => item.value));
 
+  // Solo actualiza inputValues si data cambia y es diferente de la anterior
   React.useEffect(() => {
-    setInputValues(data.map(item => item.value));
+    const newValues = data.map(item => item.value);
+    if (JSON.stringify(inputValues) !== JSON.stringify(newValues)) {
+      setInputValues(newValues);
+    }
   }, [data]);
+
+  // Solo llama a onDataChange cuando inputValues cambia
+  React.useEffect(() => {
+    const updatedData = data.map((item, index) => ({
+      label: item.label,
+      value: inputValues[index],
+    }));
+    onDataChange(updatedData);
+  }, [inputValues]);
 
   const handleTextChange = (text: string, index: number) => {
     const newInputValues = [...inputValues];
@@ -47,18 +118,18 @@ export const EditableTable: React.FC<EditableTableProps> = ({ data }) => {
   return (
     <View style={simpleTableStyles.table}>
       {data.map((row, rowIndex) => (
-        <View 
-          key={rowIndex} 
+        <View
+          key={rowIndex}
           style={[
-            simpleTableStyles.row, 
+            simpleTableStyles.row,
             rowIndex < data.length - 1 ? simpleTableStyles.rowWithBorder : {}
           ]}
         >
           <Text style={simpleTableStyles.firstCell}>{row.label}</Text>
-          <TextInput 
-            style={simpleTableStyles.secondCell} 
-            value={inputValues[rowIndex]} 
-            onChangeText={(text) => handleTextChange(text, rowIndex)} 
+          <TextInput
+            style={simpleTableStyles.secondCell}
+            value={inputValues[rowIndex]}
+            onChangeText={(text) => handleTextChange(text, rowIndex)}
           />
         </View>
       ))}
@@ -114,7 +185,7 @@ const simpleTableStyles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 8,
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 16,
   },
   row: {
     flexDirection: 'row',
@@ -122,8 +193,8 @@ const simpleTableStyles = StyleSheet.create({
     padding: 16,
   },
   rowWithBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#CCCCCC',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#c6c6c6',
   },
   firstCell: {
     flex: 1,
@@ -143,7 +214,7 @@ const singleSelectTableStyles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 8,
     backgroundColor: '#FFFFFF', // Color de fondo blanco
-    borderRadius: 24, // Bordes redondeados
+    borderRadius: 16, // Bordes redondeados
   },
   row: {
     flexDirection: 'row',
@@ -151,8 +222,8 @@ const singleSelectTableStyles = StyleSheet.create({
     padding: 16, // Padding para la fila
   },
   rowWithBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#CCCCCC',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#c6c6c6',
   },
   cell: {
     marginLeft: 10,
@@ -171,6 +242,6 @@ const singleSelectTableStyles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#000',
+    backgroundColor: '#009aef',
   },
 });

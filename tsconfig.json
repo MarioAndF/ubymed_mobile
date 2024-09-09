@@ -1,7 +1,9 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "moduleResolution": "node",
     "strict": true,
+    "esModuleInterop": true,
     "paths": {
       "@/*": [
         "./*"
@@ -10,8 +12,6 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+    "**/*.tsx"
+, "contexts/ordenes.js"  ]
 }

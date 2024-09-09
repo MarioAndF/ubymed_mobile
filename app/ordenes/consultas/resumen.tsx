@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, SectionList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
 import { SectionHeader } from '../../../components/SectionHeader';
 import { BottomButton } from '../../../components/Buttons';
 import { useOrdenConsultaMedicaContext } from '@/contexts/ordenes';
-import { SimpleTable } from '@/components/Tables';
+import { SimpleTable, EditableTable } from '@/components/Tables';
 
 export default function ResumenScreen() {
     const { ordenConsultaMedicaData } = useOrdenConsultaMedicaContext();
@@ -54,7 +54,7 @@ export default function ResumenScreen() {
 
     return (
         <View style={{ flex: 1 }}>
-            <Stack.Screen options={{ title: "Caja" }} />
+            <Stack.Screen options={{ title: "Resumen" }} />
             <SectionList
                 sections={sections}
                 keyExtractor={(item, index) => `${item.label}-${index}`}
@@ -64,7 +64,8 @@ export default function ResumenScreen() {
                         <SimpleTable data={data} />
                     </>
                 )}
-                renderItem={() => null}  // Esto previene el error proporcionando un renderItem vacío
+                renderItem={() => null}
+                stickySectionHeadersEnabled={false}
                 ListFooterComponent={
                     <Pressable onPress={handleNext}>
                         <BottomButton title="Confirmar" />

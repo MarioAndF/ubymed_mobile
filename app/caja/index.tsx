@@ -84,6 +84,7 @@ export default function CajaScreen() {
             </>
         )}
         renderItem={() => null}
+        stickySectionHeadersEnabled={false}
         ListFooterComponent={
             <Pressable onPress={handleNext}>
                 <BottomButton title="Confirmar Pago" />

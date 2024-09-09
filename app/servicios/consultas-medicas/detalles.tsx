@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Text, View } from '../../../components/Themed';
+import { Text, View, ActivityIndicator } from '../../../components/Themed';
 import { BottomButton } from '../../../components/Buttons';
 import { SimpleTable } from '../../../components/Tables';
 // API
@@ -15,51 +15,25 @@ export default function ConsultasDetallesScreen() {
   const [precio, setPrecio] = useState(""); // Inicializamos el estado del precio como vacío
   const [loading, setLoading] = useState(true); // Manejar el estado de carga
   const [error, setError] = useState(null); // Manejar errores en la API
-
-  useEffect(() => {
-    // Función para obtener el precio desde la API
-    console.log(sku)
+  
+  const loadData = useCallback(() => {
     const url = "catalog/item/?sku=" + sku
-    console.log(url)
-    const fetchPrecio = async () => {
-      try {
-        if (url) {
-          const response = await obtenerUbymedAPI(url); // Llama a la API con la URL de params
-          if (response && response.precio) {
-            setPrecio(response.precio); // Actualiza el precio
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching precio:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrecio(); // Ejecutar cuando el componente se monta
-  }, [url]);
+    obtenerUbymedAPI(url)
+      .then((data) => {
+        setPrecio(data.precio)
+      })
+      .catch((error) => {
+        console.error('Error al obtener los servicios:', error);
+      });
+  }, []);
+  
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleNext = () => {
     router.push('/ordenes/consultas/fecha');
   };
-
-  // Mostrar un indicador de carga o error si es necesario
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <Text>Cargando...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text>Error al cargar los detalles</Text>
-      </View>
-    );
-  }
 
   const data = [
     { title: 'Cobertura', detail: cobertura },

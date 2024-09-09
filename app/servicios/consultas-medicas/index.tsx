@@ -13,7 +13,7 @@ import { obtenerUbymedAPI } from '../../../api/ubymed';
 
 export default function ConsultasScreen() {
   const params = useLocalSearchParams();
-  const { nombre, descripcion, descripcion_larga, tiempo_estimado, precio, cobertura, img_url, url } = params;
+  const { nombre, descripcion, url } = params;
   const [catalogoConsultas, setCatalogo] = useState<ConsultaMedica[] | null>(null);
 
   const loadData = useCallback(() => {
@@ -44,8 +44,8 @@ export default function ConsultasScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <Link href={{
-            pathname: "servicios/consultas/detalles",
-            params: { nombre: item.nombre, descripcion: item.descripcion, descripcion_larga: item.descripcion_larga, tiempo_estimado: item.tiempo_estimado, precio: item.precio, cobertura: item.cobertura, img_url: item.img_url },
+            pathname: "servicios/consultas-medicas/detalles",
+            params: { nombre: item.nombre, descripcion: item.descripcion, descripcion_larga: item.descripcion_larga, tiempo_estimado: item.tiempo_estimado, cobertura: item.cobertura, img_url: item.img_url, url: item.url, sku: item.sku },
           }} asChild>
             <Pressable>
               <CategoryCard nombre={item.nombre} descripcion={item.descripcion} />

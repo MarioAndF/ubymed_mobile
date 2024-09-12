@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { CarritoProvider } from "@/contexts/caja"; // Asegúrate de ajustar la ruta de importación
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -41,7 +42,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <CarritoProvider>
+      <RootLayoutNav />
+    </CarritoProvider>
+  );
 }
 
 function RootLayoutNav() {

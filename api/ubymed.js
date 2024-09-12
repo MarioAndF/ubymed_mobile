@@ -19,3 +19,17 @@ export const obtenerUbymedAPI = async (url) => {
     throw error; // Maneja el error en el componente que llama a esta función
   }
 };
+
+// Nueva función para enviar la orden
+export const enviarOrden = async (payload) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/caja/consultas-medicas/crear`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error; // Maneja el error en el componente que llama a esta función
+  }
+};

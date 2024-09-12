@@ -1,37 +1,46 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Text, View, ActivityIndicator } from '../../../components/Themed';
+import { Text, View } from '../../../components/Themed';
 import { BottomButton } from '../../../components/Buttons';
 import { SimpleTable } from '../../../components/Tables';
 // API
 import { obtenerUbymedAPI } from '../../../api/ubymed';
+// CONTEXTOS
+import { useCarritoContext } from '@/contexts/caja'; // Asegúrate de ajustar la ruta de importación
 
 export default function ConsultasDetallesScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { nombre, descripcion, descripcion_larga, tiempo_estimado, cobertura, img_url, url, sku } = params;
-
   const [precio, setPrecio] = useState(""); // Inicializamos el estado del precio como vacío
   const [loading, setLoading] = useState(true); // Manejar el estado de carga
   const [error, setError] = useState(null); // Manejar errores en la API
-  
+
+  const { agregarItem } = useCarritoContext(); // Desestructurar la función agregarItem del contexto
+
   const loadData = useCallback(() => {
-    const url = "catalog/item/?sku=" + sku
+    const url = "catalogo/item/?sku=" + sku;
     obtenerUbymedAPI(url)
       .then((data) => {
-        setPrecio(data.precio)
+        setPrecio(data.precio);
+        setLoading(false);
       })
       .catch((error) => {
         console.error('Error al obtener los servicios:', error);
+        setError(error);
+        setLoading(false);
       });
-  }, []);
-  
+  }, [sku]);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const handleNext = () => {
+    if (sku) {
+      agregarItem({ sku, cantidad: 1 }); // Agrega el item al carrito
+    }
     router.push('/ordenes/consultas/fecha');
   };
 

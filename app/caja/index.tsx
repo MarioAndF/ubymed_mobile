@@ -1,42 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pressable, SectionList, Alert } from "react-native";
 import { KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
-import { View } from '@/components/Themed';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { SectionHeader } from '@/components/SectionHeader';
 import { BottomButton } from '@/components/Buttons';
 import { SimpleTable, EditableTable } from '@/components/Tables';
+import { obtenerUbymedAPI, enviarOrden } from '@/api/ubymed'; // Asegúrate de que la ruta sea correcta
+import { useCarritoContext } from '@/contexts/caja'; // Asegúrate de ajustar la ruta de importación
+
 
 export default function CajaScreen() {
+    const params = useLocalSearchParams();
+    const { id } = params;
     const router = useRouter();
+    const { vaciarCarrito } = useCarritoContext(); // Desestructurar la función vaciarCarrito del contexto
 
-    const detalleItems = [
-        { label: 'Consulta Médica', value: "350.00" },
-    ];
-
-    // Estado para manejar los datos editables
+    const [ordenData, setOrdenData] = useState({});
+    const [detalleItems, setDetalleItems] = useState([]);
     const [paymentMethodData, setPaymentMethodData] = useState([
-        { label: 'Trajeta de Crédito', value: "" },
+        { label: 'Tarjeta de Crédito', value: "" },
         { label: 'CVV', value: "" }
     ]);
-
-    const [invoiceData, setInvoiceData] = useState([
+    const [invoiceData, setInvoiceData] = useState({}); // Datos de factura
+    const [nitData, setNitData] = useState([
         { label: 'NIT', value: "" }
     ]);
 
-    // Formatear los datos en secciones
+    useEffect(() => {
+        if (id) {
+            const fetchData = async () => {
+                try {
+                    // Obtener los detalles de la orden
+                    const orden = await obtenerUbymedAPI(`ordenes/${id}`);
+                    setOrdenData({
+                        id: id,
+                        createdAt: orden.created_at,
+                        contentType: orden.contenido_tipo,
+                        estado: orden.estado,
+                    });
+    
+                    // Obtener los ítems del carrito
+                    const carritoResponse = await obtenerUbymedAPI(`caja/carrito-items?orden=${id}`);
+                    const itemsWithDetails = await Promise.all(carritoResponse.map(async (item) => {
+                        const itemDetails = await obtenerUbymedAPI(`catalogo/item/${item.item}`);
+                        return {
+                            label: `${itemDetails.nombre} (${item.cantidad})`, // Agrega la cantidad en paréntesis
+                            value: Number(itemDetails.precio).toFixed(2) // Asegúrate de que el precio sea un número
+                        };
+                    }));
+                    setDetalleItems(itemsWithDetails);
+    
+                    // Obtener la factura
+                    const facturaResponse = await obtenerUbymedAPI(`caja/facturas?orden=${id}`);
+                    console.log('Respuesta de la factura:', facturaResponse); // Verifica la respuesta de la API
+                    if (facturaResponse) {
+                        const total = parseFloat(facturaResponse.total);
+                        if (isNaN(total)) {
+                            console.error('El total de la factura no es un número válido:', facturaResponse.total);
+                            throw new Error('El total de la factura no es un número válido');
+                        }
+                        setInvoiceData({
+                            label: 'Total',
+                            value: total.toFixed(2)
+                        });
+                    } else {
+                        console.error('No se recibieron datos de la factura.');
+                        throw new Error('No se recibieron datos de la factura.');
+                    }
+    
+                } catch (error) {
+                    console.error('Error al obtener datos:', error);
+                }
+            };
+    
+            fetchData();
+        }
+    }, [id]);
+
+    const handleNext = async () => {
+        vaciarCarrito();
+        Alert.alert(
+            "Compra exitosa",
+            "Tu pago ha sido procesado correctamente.",
+            [{ text: "OK", onPress: () => router.dismissAll() }]
+        );
+    };
+
     const sections = [
         {
-            title: 'Detalles',
+            title: 'Orden',
             data: [
-                {label: "Fecha", value: "15/04/1991 00:00"},
-                {label: "Categoría", value: "Consulta Médica"}
+                { label: "ID", value: ordenData.id || "" },
+                { label: "Creada", value: ordenData.createdAt || "" },
+                { label: "Categoría", value: ordenData.contentType || "" },
+                { label: "Estado", value: ordenData.estado || "" }
             ],
         },
         {
-            title: 'Resumen',
-            data: [...detalleItems],
+            title: 'Detalle',
+            data: detalleItems,
         },
         {
             title: 'Método de Pago',
@@ -45,52 +107,44 @@ export default function CajaScreen() {
             onDataChange: setPaymentMethodData,
         },
         {
-            title: 'Factura',
-            data: invoiceData,
+            title: 'Datos de Factura',
+            data: nitData,
             editable: true,
-            onDataChange: setInvoiceData,
-        },
+            onDataChange: setNitData,
+        }
     ];
-
-    const handleNext = () => {
-        Alert.alert(
-            "Compra exitosa",
-            "Tu pago ha sido procesado correctamente.",
-            [{ text: "OK", onPress: () => router.dismissAll() }]
-        );
-    };
 
     return (
         <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : "height"}  // Prueba "position" para Android
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80}   // Ajusta este valor según sea necesario
->
-    <Stack.Screen options={{ title: "Caja" }} />
-    <SectionList
-        sections={sections}
-        keyExtractor={(item, index) => `${item.label}-${index}`}
-        renderSectionHeader={({ section: { title, data, editable, onDataChange } }) => (
-            <>
-                <SectionHeader title={title} />
-                {editable ? (
-                    <EditableTable data={data} onDataChange={onDataChange} />
-                ) : (
-                    <SimpleTable data={data} />
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80}
+        >
+            <Stack.Screen options={{ title: "Caja" }} />
+            <SectionList
+                sections={sections}
+                keyExtractor={(item, index) => `${item.label}-${index}`}
+                renderSectionHeader={({ section: { title, data, editable, onDataChange } }) => (
+                    <>
+                        <SectionHeader title={title} />
+                        {editable ? (
+                            <EditableTable data={data} onDataChange={onDataChange} />
+                        ) : (
+                            <SimpleTable data={data} />
+                        )}
+                        {title === 'Detalle' && (
+                            <SimpleTable data={[{ label: 'TOTAL', value: invoiceData.value || "0.00" }]} />
+                        )}
+                    </>
                 )}
-                {title === 'Resumen' && (
-                    <SimpleTable data={[{ label: 'TOTAL', value: `450.00` }]} />
-                )}
-            </>
-        )}
-        renderItem={() => null}
-        stickySectionHeadersEnabled={false}
-        ListFooterComponent={
-            <Pressable onPress={handleNext}>
-                <BottomButton title="Confirmar Pago" />
-            </Pressable>
-        }
-    />
-</KeyboardAvoidingView>
+                renderItem={() => null}
+                stickySectionHeadersEnabled={false}
+                ListFooterComponent={
+                    <Pressable onPress={handleNext}>
+                        <BottomButton title="Confirmar Pago" />
+                    </Pressable>
+                }
+            />
+        </KeyboardAvoidingView>
     );
 }

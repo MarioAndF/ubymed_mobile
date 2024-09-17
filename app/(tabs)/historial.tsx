@@ -1,77 +1,74 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Pressable,
   SectionList,
   RefreshControl,
   StyleSheet,
   View,
+  ActivityIndicator,
+  Alert,
+  Text
 } from "react-native";
-import { Link } from "expo-router";
+import { useRouter } from 'expo-router';
 // COMPONENTS
-import { Text, FlatList, ActivityIndicator } from "@/components/Themed";
 import { SectionHeader } from "@/components/SectionHeader";
-import { CategoryCard } from "@/components/Cards";
+import { SimpleCard } from "@/components/Cards";
 // TYPES
 import { Servicio } from "@/types/servicios";
 // API
 import { obtenerUbymedAPI } from "@/api/ubymed";
 
 export default function InicioScreen() {
-  const [servicios, setServicios] = useState<Servicio[] | null>(null);
+  const router = useRouter();
+  const [ordenes, setOrdenes] = useState<Servicio[] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(() => {
-    obtenerUbymedAPI("servicios")
+    obtenerUbymedAPI("ordenes")
       .then((data) => {
-        const serviciosActivos = data
-          .filter((servicio: Servicio) => servicio.active)
-          .sort((a: Servicio, b: Servicio) => a.sort_index - b.sort_index);
-        setServicios(serviciosActivos);
+        // Ordenar los datos por id en orden descendente
+        const ordenesData = data.sort((a, b) => b.id - a.id);
+        setOrdenes(ordenesData);
       })
       .catch((error) => {
-        console.error("Error al obtener los servicios:", error);
+        console.error("Error al obtener las ordenes:", error);
+      })
+      .finally(() => {
+        setRefreshing(false);
       });
   }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadData();
-    setRefreshing(false);
   }, [loadData]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
+  const handleCardPress = (id: number) => {
+    router.push(`ordenes/consultas-medicas?id=${id}`)
+  };
+
+  const renderEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>No hay órdenes disponibles.</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {servicios ? (
+      {ordenes ? (
         <SectionList
           sections={[
-            { title: "Servicios", data: servicios },
-            //{ title: 'Directorios', data: servicios },
-            //{ title: 'Productos', data: servicios },
+            { title: "Órdenes", data: ordenes },
           ]}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <Link
-              href={{
-                pathname: `/${item.url}`,
-                params: {
-                  nombre: item.nombre,
-                  descripcion: item.descripcion,
-                  url: item.url,
-                },
-              }}
-              asChild
-            >
-              <Pressable>
-                <CategoryCard
-                  nombre={item.nombre}
-                  descripcion={item.descripcion}
-                />
-              </Pressable>
-            </Link>
+            <SimpleCard
+              text={`ID: ${item.id}\nCreada: ${item.created_at}\nTipo: ${item.contenido_tipo}\nEstado: ${item.estado}`}
+              onPress={() => handleCardPress(item.id)}
+            />
           )}
           renderSectionHeader={({ section: { title } }) => (
             <SectionHeader title={title} />
@@ -80,6 +77,7 @@ export default function InicioScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ListEmptyComponent={renderEmptyComponent}
         />
       ) : (
         <View style={styles.loaderContainer}>
@@ -98,5 +96,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: 'gray',
   },
 });

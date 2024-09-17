@@ -3,10 +3,10 @@ import React from 'react';
 import { StyleSheet, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 // UI COMPONENTS
-import { Text, View } from '../../../components/Themed';
-import { HeaderText } from '../../../components/StyledText';
-import { TextView } from '../../../components/TextFields';
-import { BottomButton } from '../../../components/Buttons';
+import { Text, View } from '@/components/Themed';
+import { HeaderText } from '@/components/StyledText';
+import { TextView } from '@/components/TextFields';
+import { BottomButton } from '@/components/Buttons';
 // CONTEXTS
 import { useOrdenConsultaMedicaContext } from '@/contexts/ordenes';
 
@@ -30,7 +30,7 @@ export default function MotivoScreen() {
     const handleNext = () => {
         // Actualiza el contexto solo cuando el usuario presiona "Siguiente"
         updateOrdenConsultaMedicaData({ detalles });
-        router.push('/ordenes/consultas/lugar');
+        router.push('/ordenes/consultas-medicas/crear/lugar');
     };
 
     return (

@@ -2,8 +2,8 @@ import React from 'react';
 import { Pressable, SectionList, View, Alert, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { SectionHeader } from '../../../components/SectionHeader';
-import { BottomButton } from '../../../components/Buttons';
+import { SectionHeader } from '@/components/SectionHeader';
+import { BottomButton } from '@/components/Buttons';
 import { useOrdenConsultaMedicaContext } from '@/contexts/ordenes';
 import { useCarritoContext } from '@/contexts/caja';
 import { SimpleTable } from '@/components/Tables';
@@ -57,7 +57,7 @@ export default function ResumenScreen() {
         return {
             orden: {
                 usuario: 1,
-                contenido_tipo: "consulta-medica",
+                contenido_tipo: "consultas-medicas",
             },
             detalles: {
                 socio: 1,
@@ -101,7 +101,6 @@ export default function ResumenScreen() {
                 if (data && data.orden && data.orden.id) {
                     const ordenId = data.orden.id;
                     console.log(ordenId)
-                    Alert.alert('Éxito', 'Los datos se enviaron correctamente.');
                     const url = `/caja?id=${ordenId}`;
                     console.log('URL construida:', url);
                     router.push(url);
@@ -121,7 +120,7 @@ export default function ResumenScreen() {
 
     return (
         <View style={{ flex: 1 }}>
-            <Stack.Screen options={{ title: "Resumen" }} />
+            <Stack.Screen options={{ title: "Confirmar" }} />
             <SectionList
                 sections={sections}
                 keyExtractor={(item, index) => `${item.label}-${index}`}

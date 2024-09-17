@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Pressable, View, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { HeaderText } from '../../../components/StyledText';
-import { SingleSelectTable, DateTimeTable } from '../../../components/Tables'; 
-import { BottomButton } from '../../../components/Buttons';
+import { HeaderText } from '@/components/StyledText';
+import { SingleSelectTable, DateTimeTable } from '@/components/Tables'; 
+import { BottomButton } from '@/components/Buttons';
 import { useOrdenConsultaMedicaContext } from '@/contexts/ordenes';
 import { OrdenConsultaMedica } from '@/types/ordenes';
 
@@ -47,7 +47,7 @@ export default function FechaScreen() {
         }
 
         updateOrdenConsultaMedicaData(updatedData);
-        router.push('/ordenes/consultas/cliente');
+        router.push('/ordenes/consultas-medicas/crear/cliente');
     };
 
     return (

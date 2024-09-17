@@ -41,7 +41,7 @@ export default function ConsultasDetallesScreen() {
     if (sku) {
       agregarItem({ sku, cantidad: 1 }); // Agrega el item al carrito
     }
-    router.push('/ordenes/consultas/fecha');
+    router.push('/ordenes/consultas-medicas/crear');
   };
 
   const data = [

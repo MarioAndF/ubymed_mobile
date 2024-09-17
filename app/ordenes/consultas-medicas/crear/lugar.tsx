@@ -4,10 +4,10 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { Text, View } from '../../../components/Themed';
-import { HeaderText } from '../../../components/StyledText';
-import { BottomButton } from '../../../components/Buttons';
-import { TextField } from '../../../components/TextFields';
+import { Text, View } from '@/components/Themed';
+import { HeaderText } from '@/components/StyledText';
+import { BottomButton } from '@/components/Buttons';
+import { TextField } from '@/components/TextFields';
 import { useOrdenConsultaMedicaContext } from '@/contexts/ordenes';
 import debounce from 'lodash/debounce'; // Usando lodash.debounce
 
@@ -108,7 +108,7 @@ export default function LugarScreen() {
       direccion,
       geolocalizacion: `POINT (${mapPosition.longitude} ${mapPosition.latitude})`,
     });
-    router.push('/ordenes/consultas/resumen');
+    router.push('/ordenes/consultas-medicas/crear/confirmar');
   };
 
   // Determine initial region based on user location or default map position
